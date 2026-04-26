@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, getMasterKey } from '../../store';
-import { X, Save, Plus, Trash2, Edit2, Shield, Settings, Users as UsersIcon, Bot, Database, Upload, Lock } from 'lucide-react';
+import { X, Save, Plus, Trash2, Edit2, Shield, Settings, Users as UsersIcon, Bot, Database, Upload, Lock, Download } from 'lucide-react';
 import { User, getUsers, createUser, updateUser, deleteUser, updateSetting, getDb, verifyPassword } from '../../lib/db';
 import { toast } from 'sonner';
 import CryptoJS from 'crypto-js';
 import { invoke } from '@tauri-apps/api/core';
 import { open, ask, message } from '@tauri-apps/plugin-dialog';
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
+import { getVersion } from '@tauri-apps/api/app';
 
 export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClose: () => void, initialTab?: 'settings' | 'users' | 'ai' | 'backup' }) {
   const { currentUser, setCurrentUser, settings, fetchSettings, isBotRunning, startBot } = useAppStore();
@@ -73,6 +76,37 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
       toast.success('Lưu cấu hình tiệm thành công!');
     } catch (e: any) {
       toast.error('Lỗi: ' + e.message);
+    }
+  };
+
+  const handleCheckUpdate = async () => {
+    try {
+      toast.loading('Đang kiểm tra máy chủ cập nhật...', { id: 'update-check' });
+      const update = await check({
+        headers: { Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}` }
+      });
+      toast.dismiss('update-check');
+      
+      if (update) {
+        const yes = await ask(`Có bản cập nhật mới (v${update.version}). Bạn có muốn tải về và cài đặt ngay không?`, {
+            title: 'Cập nhật Cầm Đồ 55',
+            kind: 'info',
+            okLabel: 'Cập nhật ngay',
+            cancelLabel: 'Để sau'
+        });
+        
+        if (yes) {
+          toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy.`, { duration: 10000 });
+          await update.downloadAndInstall();
+          toast.success('Cập nhật thành công! Đang khởi động lại...');
+          await relaunch();
+        }
+      } else {
+        toast.info('Bạn đang sử dụng phiên bản mới nhất!');
+      }
+    } catch (e: any) {
+      toast.dismiss('update-check');
+      toast.error('Lỗi kiểm tra cập nhật: ' + e);
     }
   };
 
@@ -326,12 +360,23 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
                     />
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-4 flex items-center justify-between border-b border-slate-800 pb-6">
                     <button 
                       onClick={handleSaveSettings}
                       className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_-5px_#9333ea] flex items-center gap-2"
                     >
                       <Save className="w-4 h-4" /> Lưu Cấu Hình
+                    </button>
+                  </div>
+
+                  <div className="pt-2">
+                    <h4 className="text-sm font-bold text-slate-300 mb-2">Cập Nhật Phần Mềm</h4>
+                    <p className="text-xs text-slate-500 mb-4">Phiên bản hiện tại: <strong className="text-slate-300">{appVersion || '...'}</strong></p>
+                    <button 
+                      onClick={handleCheckUpdate}
+                      className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" /> Kiểm tra Cập nhật
                     </button>
                   </div>
                 </div>
