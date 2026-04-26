@@ -1,0 +1,49 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "sql:default",
+    "sql:allow-execute",
+    "sql:allow-select",
+    "sql:allow-load",
+    "sql:allow-close",
+    "notification:default",
+    "fs:default",
+    "fs:allow-write-file",
+    "fs:allow-appdata-read",
+    "fs:allow-appdata-write",
+    "dialog:default",
+    "shell:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "telegram-agent",
+          "sidecar": true,
+          "args": true
+        },
+        {
+          "name": "pkill",
+          "cmd": "pkill",
+          "args": true
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "telegram-agent",
+          "sidecar": true,
+          "args": true
+        }
+      ]
+    }
+  ]
+}
