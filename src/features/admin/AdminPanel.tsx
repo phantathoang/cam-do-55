@@ -32,7 +32,11 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<Partial<User> | null>(null);
 
+  // App Update State
+  const [appVersion, setAppVersion] = useState('');
+
   useEffect(() => {
+    getVersion().then(setAppVersion).catch(console.error);
     loadUsers();
     
     // Decrypt keys if they exist
