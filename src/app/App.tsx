@@ -71,7 +71,11 @@ function App() {
 
   const checkForAppUpdates = async () => {
     try {
-      const update = await check();
+      const update = await check({
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`
+        }
+      });
       if (update) {
         const yes = await ask(`Có bản cập nhật mới (v${update.version}). Bạn có muốn tải về và cài đặt ngay không?`, {
             title: 'Cập nhật Cầm Đồ 55',
