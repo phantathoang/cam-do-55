@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore, calculateProfit, getContractStatus } from '../store';
-import { Plus, Search, Users, Package, Settings, LogOut, TrendingUp, AlertCircle, DollarSign, RefreshCw, Bot, DownloadCloud } from 'lucide-react';
+import { Plus, Search, Users, Package, Settings, LogOut, TrendingUp, AlertCircle, DollarSign, RefreshCw, Bot } from 'lucide-react';
 import { toast } from 'sonner';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
@@ -18,7 +18,6 @@ import { listen } from '@tauri-apps/api/event';
 function App() {
   const { fetchData, searchQuery, setSearchQuery, currentUser, setCurrentUser, fetchSettings, contracts, isBotRunning, startBot } = useAppStore();
   const [adminInitialTab, setAdminInitialTab] = useState<'settings' | 'users' | 'ai'>('settings');
-  const [isUpdating, setIsUpdating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showCustomers, setShowCustomers] = useState(false);
   const [showWarehouse, setShowWarehouse] = useState(false);
@@ -69,7 +68,6 @@ function App() {
     try {
       const update = await check();
       if (update) {
-        setIsUpdating(true);
         toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy.`, { duration: 10000 });
         await update.downloadAndInstall();
         toast.success('Cập nhật thành công! Đang khởi động lại...');
