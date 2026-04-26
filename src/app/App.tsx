@@ -5,6 +5,8 @@ import { Plus, Search, Users, Package, Settings, LogOut, TrendingUp, AlertCircle
 import { toast } from 'sonner';
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
+import { ask } from '@tauri-apps/plugin-dialog';
+import { getVersion } from '@tauri-apps/api/app';
 import BackgroundAnimation from '../components/ui/BackgroundAnimation';
 import ContractForm from '../features/contracts/ContractForm';
 import ContractList from '../features/contracts/ContractList';
@@ -25,6 +27,7 @@ function App() {
   const [isDbReady, setIsDbReady] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [systemContextMenu, setSystemContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [appVersion, setAppVersion] = useState<string>('');
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +49,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    getVersion().then(v => setAppVersion(v)).catch(console.error);
+    
     initDb().then(() => {
       setIsDbReady(true);
       fetchSettings();
@@ -68,10 +73,19 @@ function App() {
     try {
       const update = await check();
       if (update) {
-        toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy.`, { duration: 10000 });
-        await update.downloadAndInstall();
-        toast.success('Cập nhật thành công! Đang khởi động lại...');
-        await relaunch();
+        const yes = await ask(`Có bản cập nhật mới (v${update.version}). Bạn có muốn tải về và cài đặt ngay không?`, {
+            title: 'Cập nhật Cầm Đồ 55',
+            kind: 'info',
+            okLabel: 'Cập nhật ngay',
+            cancelLabel: 'Để sau'
+        });
+        
+        if (yes) {
+          toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy.`, { duration: 10000 });
+          await update.downloadAndInstall();
+          toast.success('Cập nhật thành công! Đang khởi động lại...');
+          await relaunch();
+        }
       }
     } catch (e) {
       console.error('Failed to check for updates:', e);
@@ -169,7 +183,7 @@ function App() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white">Cầm Đồ 55</h1>
-              <p className="text-xs text-slate-400 font-medium tracking-wide">SYSTEM V2.0 PREMIUM</p>
+              <p className="text-xs text-slate-400 font-medium tracking-wide">SYSTEM PREMIUM {appVersion && `(v${appVersion})`}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
