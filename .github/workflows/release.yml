@@ -43,3 +43,4 @@ jobs:
           releaseBody: 'Xem thông tin bản cập nhật để biết thêm chi tiết.'
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true
