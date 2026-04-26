@@ -86,9 +86,7 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
   const handleCheckUpdate = async () => {
     try {
       toast.loading('Đang kiểm tra máy chủ cập nhật...', { id: 'update-check' });
-      const update = await check({
-        headers: { Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}` }
-      });
+      const update = await check();
       toast.dismiss('update-check');
       
       if (update) {

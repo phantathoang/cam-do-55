@@ -35,7 +35,20 @@ export async function getMasterKey(): Promise<string> {
   }
 }
 
-async function pushSystemNotification(title: string, body: string) {
+async function pushSystemNotification(title: string, body: string): Promise<boolean> {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+
+  // Khung giờ cho phép: 7:30-8:30, 13:30-14:30, 19:30-20:30
+  const isMorning = (h === 7 && m >= 30) || (h === 8 && m <= 30);
+  const isAfternoon = (h === 13 && m >= 30) || (h === 14 && m <= 30);
+  const isEvening = (h === 19 && m >= 30) || (h === 20 && m <= 30);
+
+  if (!isMorning && !isAfternoon && !isEvening) {
+    return false; // Không gửi thông báo ngoài khung giờ
+  }
+
   try {
     let permissionGranted = await isPermissionGranted();
     if (!permissionGranted) {
@@ -44,10 +57,12 @@ async function pushSystemNotification(title: string, body: string) {
     }
     if (permissionGranted) {
       sendNotification({ title, body, sound: 'default' });
+      return true;
     }
   } catch (e) {
     console.error("Notification error:", e);
   }
+  return false;
 }
 
 interface AppState {
@@ -184,14 +199,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (d >= 26 && d <= 29) {
           const key = `soon_${c.id}`;
           if (!notifiedAlerts.has(key)) {
-            pushSystemNotification('⏳ Sắp đến hạn', `K/H ${c.customer_name} đã vay ${d} ngày.`);
-            notifiedAlerts.add(key);
+            const sent = await pushSystemNotification('⏳ Sắp đến hạn', `K/H ${c.customer_name} đã vay ${d} ngày.`);
+            if (sent) notifiedAlerts.add(key);
           }
         } else if (d === 30) {
           const key = `due_${c.id}`;
           if (!notifiedAlerts.has(key)) {
-            pushSystemNotification('🎯 Tròn đến hạn', `K/H ${c.customer_name} đã vay đúng 30 ngày.`);
-            notifiedAlerts.add(key);
+            const sent = await pushSystemNotification('🎯 Tròn đến hạn', `K/H ${c.customer_name} đã vay đúng 30 ngày.`);
+            if (sent) notifiedAlerts.add(key);
           }
         } else if (d >= 39 && isTheChap) {
           if (c.status !== 'Thanh Lý') {
@@ -200,8 +215,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           }
           const key = `liquidate_${c.id}`;
           if (!notifiedAlerts.has(key)) {
-            pushSystemNotification('🔨 CHUYỂN THANH LÝ', `K/H ${c.customer_name} đã trễ hạn từ 39 ngày trở lên. HĐ được tự động chuyển sang khu vực Thanh Lý.`);
-            notifiedAlerts.add(key);
+            const sent = await pushSystemNotification('🔨 CHUYỂN THANH LÝ', `K/H ${c.customer_name} đã trễ hạn từ 39 ngày trở lên. HĐ được tự động chuyển sang khu vực Thanh Lý.`);
+            if (sent) notifiedAlerts.add(key);
           }
         } else if (d >= 31) {
           if (c.status === 'Đang chờ') {
@@ -210,8 +225,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           }
           const key = `overdue_${c.id}`;
           if (!notifiedAlerts.has(key)) {
-            pushSystemNotification('⚠️ HỢP ĐỒNG QUÁ HẠN', `K/H ${c.customer_name} đã trễ ${d - 30} ngày. HĐ được tự động chuyển sang Quá hạn.`);
-            notifiedAlerts.add(key);
+            const sent = await pushSystemNotification('⚠️ HỢP ĐỒNG QUÁ HẠN', `K/H ${c.customer_name} đã trễ ${d - 30} ngày. HĐ được tự động chuyển sang Quá hạn.`);
+            if (sent) notifiedAlerts.add(key);
           }
         }
       }

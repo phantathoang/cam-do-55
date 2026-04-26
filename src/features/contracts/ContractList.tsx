@@ -181,10 +181,10 @@ export default function ContractList() {
         })}
       </div>
 
-      <div className="flex items-center justify-between px-1 shrink-0 relative" ref={sortRef}>
+      <div className="flex items-center justify-between px-1 shrink-0 relative">
         <h2 className="text-sm font-bold text-slate-300">Danh sách hợp đồng</h2>
         
-        <div className="relative z-50">
+        <div className="relative z-50" ref={sortRef}>
           <button 
             onClick={() => setShowSortMenu(!showSortMenu)}
             className="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm"
