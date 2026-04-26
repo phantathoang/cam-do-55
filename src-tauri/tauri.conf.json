@@ -38,5 +38,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/phantathoang/cam-do-55/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVFNDg1MjE2ODNENUY4NzYKUldSMitOV0RGbEpJWHZaallrb3RTblBsL29SZWRQMzBvTTRtNlI3dUdJWFZXaFM4MXN3SEZ2Yk8K"
+    }
   }
 }

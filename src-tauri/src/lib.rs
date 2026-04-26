@@ -1,7 +1,7 @@
 use tauri::{
-    tray::TrayIconBuilder,
     menu::{MenuBuilder, MenuItemBuilder},
-    Manager, RunEvent, WindowEvent, Emitter
+    tray::TrayIconBuilder,
+    Emitter, Manager, RunEvent, WindowEvent,
 };
 
 #[tauri::command]
@@ -16,7 +16,7 @@ use std::path::PathBuf;
 fn backup_database(app: tauri::AppHandle, filename: String) -> Result<String, String> {
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     let desktop_dir = app.path().desktop_dir().map_err(|e| e.to_string())?;
-    
+
     let db_path = app_data_dir.join("cd_app.db");
     if !db_path.exists() {
         return Err("Database file not found".into());
@@ -37,7 +37,7 @@ fn backup_database(app: tauri::AppHandle, filename: String) -> Result<String, St
 fn restore_database(app: tauri::AppHandle, backup_path_str: String) -> Result<String, String> {
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     let db_path = app_data_dir.join("cd_app.db");
-    
+
     let backup_path = PathBuf::from(backup_path_str);
     if !backup_path.exists() {
         return Err("Backup file not found".into());
@@ -56,9 +56,13 @@ fn restore_database(app: tauri::AppHandle, backup_path_str: String) -> Result<St
 }
 
 #[tauri::command]
-fn export_report(app: tauri::AppHandle, filename: String, content: String) -> Result<String, String> {
+fn export_report(
+    app: tauri::AppHandle,
+    filename: String,
+    content: String,
+) -> Result<String, String> {
     let desktop_dir = app.path().desktop_dir().map_err(|e| e.to_string())?;
-    
+
     let report_dir = desktop_dir.join("cam-do-55").join("camdo-55-report");
     if !report_dir.exists() {
         fs::create_dir_all(&report_dir).map_err(|e| e.to_string())?;
@@ -92,9 +96,11 @@ fn open_folder(path: String) -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let toggle_i = MenuItemBuilder::with_id("toggle", "Mở Giao Diện").build(app)?;
-            let create_contract_i = MenuItemBuilder::with_id("create_contract", "Lập Hợp Đồng").build(app)?;
+            let create_contract_i =
+                MenuItemBuilder::with_id("create_contract", "Lập Hợp Đồng").build(app)?;
             let quit_i = MenuItemBuilder::with_id("quit", "Thoát Hoàn Toàn Ứng Dụng").build(app)?;
             let menu = MenuBuilder::new(app)
                 .items(&[&toggle_i, &create_contract_i, &quit_i])
@@ -142,7 +148,15 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![greet, backup_database, restore_database, export_report, open_folder])
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            backup_database,
+            restore_database,
+            export_report,
+            open_folder
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match event {
