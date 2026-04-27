@@ -61,23 +61,21 @@ jobs:
             VERSION=${VERSION#v}
             URL="https://github.com/phantathoang/cam-do-55/releases/download/${{ github.ref_name }}/C.m.D.55_aarch64.app.tar.gz"
             
-            cat <<EOF > latest.json
-            {
-              "version": "$VERSION",
-              "notes": "Bản cập nhật $VERSION",
-              "pub_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            echo '{
+              "version": "'"$VERSION"'",
+              "notes": "Bản cập nhật '"$VERSION"'",
+              "pub_date": "'"$(date -u +"%Y-%m-%dT%H:%M:%SZ")"'",
               "platforms": {
                 "darwin-aarch64": {
-                  "signature": "$SIG",
-                  "url": "$URL"
+                  "signature": "'"$SIG"'",
+                  "url": "'"$URL"'"
                 },
                 "darwin-x86_64": {
-                  "signature": "$SIG",
-                  "url": "$URL"
+                  "signature": "'"$SIG"'",
+                  "url": "'"$URL"'"
                 }
               }
-            }
-EOF
+            }' > latest.json
             cat latest.json
           else
             echo "ERROR: Signature file not found! tauri build failed to sign."
