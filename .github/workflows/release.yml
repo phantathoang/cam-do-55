@@ -34,9 +34,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_PRIVATE_KEY: "dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5Q3I3eDFRaWFZM1A2SDMzakNxdHZnbVlJb25hbXRiU1FDZU96cUFxaVpDY0FBQkFBQUFBQUFBQUFBQUlBQUFBQUoweGxNVThSQ0xEMVBmZmFuaGpUZVBZYXZELzVUWGtvcEFndUFjNk0rc1RLSmFuWktzcldNWmxUc2ttVzJXYndFYkl4Z1ZCT0hiUTZGMzJtK3EwNEVoVTBleWF3U3lEQU9kdEx1NWRlaXNocHY2d0lMT1VJWE5qR096UC9yNmZjbmViMWRBeVJHVms9Cg=="
           TAURI_KEY_PASSWORD: ""
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: "dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5Q3I3eDFRaWFZM1A2SDMzakNxdHZnbVlJb25hbXRiU1FDZU96cUFxaVpDY0FBQkFBQUFBQUFBQUFBQUlBQUFBQUoweGxNVThSQ0xEMVBmZmFuaGpUZVBZYXZELzVUWGtvcEFndUFjNk0rc1RLSmFuWktzcldNWmxUc2ttVzJXYndFYkl4Z1ZCT0hiUTZGMzJtK3EwNEVoVTBleWF3U3lEQU9kdEx1NWRlaXNocHY2d0lMT1VJWE5qR096UC9yNmZjbmViMWRBeVJHVms9Cg=="
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
           VITE_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         with:
@@ -54,9 +54,9 @@ jobs:
           ls -la src-tauri/target/release/bundle/macos/ || true
           
           echo "Generating latest.json manually..."
-          SIG_FILE=$(ls src-tauri/target/release/bundle/macos/*.app.tar.gz.sig 2>/dev/null | head -n 1)
+          SIG_FILE=$(find src-tauri/target/release/bundle/macos -name "*.app.tar.gz.sig" | head -n 1)
           if [ -f "$SIG_FILE" ]; then
-            SIG=$(cat "$SIG_FILE")
+            SIG=$(<"$SIG_FILE")
             VERSION="${{ github.ref_name }}"
             VERSION=${VERSION#v}
             URL="https://github.com/phantathoang/cam-do-55/releases/download/${{ github.ref_name }}/C.m.D.55_aarch64.app.tar.gz"
