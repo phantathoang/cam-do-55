@@ -108,7 +108,12 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
       }
     } catch (e: any) {
       toast.dismiss('update-check');
-      toast.error('Lỗi kiểm tra cập nhật: ' + e);
+      const errStr = String(e);
+      if (errStr.includes('Could not fetch a valid release JSON') || errStr.includes('404')) {
+         toast.info('Bạn đang sử dụng phiên bản mới nhất!');
+      } else {
+         toast.error('Lỗi kiểm tra cập nhật: ' + errStr);
+      }
     }
   };
 
