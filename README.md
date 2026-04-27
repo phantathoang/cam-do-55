@@ -30,11 +30,15 @@
 Vì đây là ứng dụng mã nguồn kín (Private), bạn có thể tải bản cài đặt chính thức từ trang Releases của dự án:
 
 1. Truy cập vào mục **[Releases](../../releases/latest)** trên GitHub.
-2. Tải về file có đuôi `.dmg` (Ví dụ: `C.m.D.55_0.1.25_aarch64.dmg`).
+2. Tải về file có đuôi `.dmg` (Ví dụ: `C.m.D.55_1.0.0_aarch64.dmg`).
 3. Mở file `.dmg` và kéo biểu tượng **Cầm Đồ 55** vào thư mục `Applications`.
 4. Mở ứng dụng từ Launchpad.
 
-> **Lưu ý:** Trong lần mở đầu tiên, macOS có thể hiện cảnh báo bảo mật. Hãy vào `System Settings > Privacy & Security` và cho phép mở ứng dụng.
+> **⚠️ Xử lý lỗi "App is damaged" (Ứng dụng bị hỏng):** 
+> Vì ứng dụng không được ký bằng tài khoản Apple Developer trả phí, macOS có thể chặn mở ứng dụng. Để khắc phục triệt để, bạn mở ứng dụng **Terminal** trên Mac và chạy lệnh sau (nhập mật khẩu máy tính nếu được yêu cầu):
+> ```bash
+> sudo xattr -cr /Applications/Cầm\ Đồ\ 55.app
+> ```
 
 ## 🛠 Ngăn kéo Công nghệ (Tech Stack)
 
