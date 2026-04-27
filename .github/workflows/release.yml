@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest]
+        platform: [macos-latest, windows-latest]
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -26,6 +26,20 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin, x86_64-apple-darwin
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Build Python Sidecar (Windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          cd telegram-agent
+          pip install -r requirements.txt
+          pip install pyinstaller
+          pyinstaller agent.spec
+          copy dist\telegram-agent.exe ..\src-tauri\telegram-agent-x86_64-pc-windows-msvc.exe
 
       - name: Install frontend dependencies
         run: npm install
@@ -48,7 +62,8 @@ jobs:
           includeUpdaterJson: true
           args: --verbose
 
-      - name: Debug Output Artifacts
+      - name: Debug Output Artifacts (macOS only)
+        if: matrix.platform == 'macos-latest'
         run: |
           echo "Listing all files in src-tauri/target/release/bundle/macos/"
           ls -la src-tauri/target/release/bundle/macos/ || true
@@ -81,7 +96,8 @@ jobs:
             echo "ERROR: Signature file not found! tauri build failed to sign."
           fi
 
-      - name: Upload latest.json to Release
+      - name: Upload latest.json to Release (macOS only)
+        if: matrix.platform == 'macos-latest'
         uses: softprops/action-gh-release@v2
         with:
           files: latest.json
