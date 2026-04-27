@@ -378,7 +378,7 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
 
                   <div className="pt-2">
                     <h4 className="text-sm font-bold text-slate-300 mb-2">Cập Nhật Phần Mềm</h4>
-                    <p className="text-xs text-slate-500 mb-4">Phiên bản hiện tại: <strong className="text-slate-300">{appVersion || '...'}</strong></p>
+                    <p className="text-slate-400 text-sm mb-4">Phiên bản hiện tại: <span className="font-bold text-slate-200">0.1.19 (Test Auto-Update)</span></p>
                     <button 
                       onClick={handleCheckUpdate}
                       className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
