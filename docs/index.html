@@ -40,6 +40,13 @@
         .btn-secondary { background: #000; color: #fff; border: 1px solid #333; transition: all 0.2s; }
         .btn-secondary:hover { background: #111; border-color: #666; }
         .hero-glow { position: absolute; width: 60vw; height: 30vw; left: 20vw; top: 20%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); filter: blur(60px); z-index: -1; }
+        
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            40% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     </style>
 </head>
 <body class="antialiased selection:bg-white selection:text-black">
@@ -180,11 +187,19 @@
                     <div class="space-y-4">
                         <div class="glass-card p-4 rounded-xl text-sm text-vercel-muted flex items-start gap-3">
                             <i class="ph-fill ph-check-circle text-white text-lg shrink-0 mt-0.5"></i>
-                            <p>"Báo cáo cho anh tổng lãi đã thu trong tháng này."</p>
+                            <p>Thêm hợp đồng chỉ với 1 tin nhắn: "Anh ABC hôm nay vay 10 triệu"</p>
                         </div>
                         <div class="glass-card p-4 rounded-xl text-sm text-vercel-muted flex items-start gap-3">
                             <i class="ph-fill ph-check-circle text-white text-lg shrink-0 mt-0.5"></i>
-                            <p>"Liệt kê các hợp đồng quá hạn trên 30 ngày."</p>
+                            <p>Tự nhắc lãi khi sắp đến hạn | đến hạn | quá hạn</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-sm text-vercel-muted flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-white text-lg shrink-0 mt-0.5"></i>
+                            <p>Tự thông báo báo cáo theo giờ</p>
+                        </div>
+                        <div class="glass-card p-4 rounded-xl text-sm text-vercel-muted flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-white text-lg shrink-0 mt-0.5"></i>
+                            <p>Phân tích | Thống kê dòng tiền chi tiết...</p>
                         </div>
                     </div>
                 </div>
@@ -237,15 +252,15 @@
             <p class="text-xl text-vercel-muted font-light mb-12 max-w-2xl mx-auto">
                 Phần mềm hoàn toàn miễn phí. Nếu ứng dụng mang lại giá trị cho bạn, hãy mời tôi một ly cafe để duy trì máy chủ nhé.
             </p>
-            <button onclick="document.getElementById('donate-modal').classList.remove('hidden')" class="btn-primary px-8 py-4 rounded-lg font-bold text-lg inline-flex items-center gap-2 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            <button onclick="openDonateModal()" class="btn-primary px-8 py-4 rounded-lg font-bold text-lg inline-flex items-center gap-2 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 <i class="ph-bold ph-coffee"></i> Mời Cafe
             </button>
         </div>
 
         <!-- Modal -->
         <div id="donate-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4 transition-all">
-            <div class="glass-card border border-white/10 p-10 rounded-2xl max-w-sm w-full relative transform scale-100">
-                <button onclick="document.getElementById('donate-modal').classList.add('hidden')" class="absolute top-5 right-5 text-vercel-muted hover:text-white transition-colors">
+            <div id="donate-modal-content" class="glass-card border border-white/10 p-10 rounded-2xl max-w-sm w-full relative transform scale-100 opacity-0">
+                <button onclick="closeDonateModal()" class="absolute top-5 right-5 text-vercel-muted hover:text-white transition-colors">
                     <i class="ph-bold ph-x text-xl"></i>
                 </button>
                 <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6">
@@ -293,9 +308,27 @@
         }
         fetchDownloads();
 
+        function openDonateModal() {
+            const modal = document.getElementById('donate-modal');
+            const content = document.getElementById('donate-modal-content');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Trigger animation
+            content.classList.remove('animate-pop');
+            void content.offsetWidth; // Reflow
+            content.classList.add('animate-pop');
+        }
+
+        function closeDonateModal() {
+            const modal = document.getElementById('donate-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
         window.onclick = function(e) {
             const modal = document.getElementById('donate-modal');
-            if (e.target == modal) modal.classList.add('hidden');
+            if (e.target == modal) closeDonateModal();
         }
     </script>
 </body>
