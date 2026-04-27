@@ -46,3 +46,11 @@ jobs:
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
+          args: --verbose
+
+      - name: Debug Output Artifacts
+        run: |
+          echo "Listing all files in src-tauri/target/release/bundle/macos/"
+          ls -la src-tauri/target/release/bundle/macos/ || true
+          echo "Listing all files in src-tauri/target/release/bundle/dmg/"
+          ls -la src-tauri/target/release/bundle/dmg/ || true
