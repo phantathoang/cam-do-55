@@ -84,6 +84,13 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
   };
 
   const handleCheckUpdate = async () => {
+    if (!navigator.onLine) {
+      toast.error('Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền mạng.', {
+        description: 'Cần có mạng để kiểm tra bản cập nhật mới.'
+      });
+      return;
+    }
+
     try {
       toast.loading('Đang kiểm tra máy chủ cập nhật...', { id: 'update-check' });
       const update = await check();
@@ -98,10 +105,22 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
         });
         
         if (yes) {
-          toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy.`, { duration: 10000 });
-          await update.downloadAndInstall();
-          toast.success('Cập nhật thành công! Đang khởi động lại...');
-          await relaunch();
+          const loadingId = toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy hoặc ngắt mạng.`, { duration: 999999 });
+          try {
+            await update.downloadAndInstall();
+            toast.success('Cập nhật thành công! Đang khởi động lại...', { id: loadingId, duration: 5000 });
+            await relaunch();
+          } catch (installError: any) {
+            toast.dismiss(loadingId);
+            if (!navigator.onLine) {
+               toast.error('Cập nhật thất bại do rớt mạng.', { description: 'Vui lòng kiểm tra lại mạng và thử lại.' });
+            } else {
+               toast.error('Quá trình cài đặt bị gián đoạn.', {
+                 description: 'Do lỗi kết nối hoặc bản cài đặt bị hỏng. Bạn có thể tải bản mới nhất trực tiếp trên trang web.'
+               });
+               console.error("Update Install Error:", installError);
+            }
+          }
         }
       } else {
         toast.info('Bạn đang sử dụng phiên bản mới nhất!');
@@ -111,8 +130,11 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
       const errStr = String(e);
       if (errStr.includes('Could not fetch a valid release JSON') || errStr.includes('404')) {
          toast.info('Bạn đang sử dụng phiên bản mới nhất!');
+      } else if (!navigator.onLine || errStr.includes('Failed to fetch') || errStr.includes('network') || errStr.includes('timeout')) {
+         toast.error('Không thể kết nối đến máy chủ cập nhật.', { description: 'Vui lòng kiểm tra lại đường truyền mạng.' });
       } else {
-         toast.error('Lỗi kiểm tra cập nhật: ' + errStr);
+         toast.error('Hệ thống cập nhật đang tạm gián đoạn.', { description: 'Bạn có thể tải bản mới nhất trực tiếp trên trang chủ.'});
+         console.error("Update Check Error:", errStr);
       }
     }
   };
