@@ -69,8 +69,12 @@ function App() {
     };
   }, []);
 
+  const isUpdatingRef = useRef(false);
+
   const checkForAppUpdates = async () => {
+    if (isUpdatingRef.current) return;
     try {
+      isUpdatingRef.current = true;
       const update = await check();
       if (update) {
         const yes = await ask(`Có bản cập nhật mới (v${update.version}). Bạn có muốn tải về và cài đặt ngay không?`, {
@@ -82,13 +86,37 @@ function App() {
         
         if (yes) {
           toast.loading(`Đang tải bản cập nhật ${update.version}... Vui lòng không tắt máy.`, { duration: 10000 });
-          await update.downloadAndInstall();
-          toast.success('Cập nhật thành công! Đang khởi động lại...');
-          await relaunch();
+          
+          let downloaded = 0;
+          let contentLength = 0;
+          
+          await update.downloadAndInstall((event) => {
+            switch (event.event) {
+              case 'Started':
+                contentLength = event.data.contentLength || 0;
+                break;
+              case 'Progress':
+                downloaded += event.data.chunkLength;
+                break;
+              case 'Finished':
+                toast.success('Cập nhật thành công! Đang khởi động lại...');
+                break;
+            }
+          });
+          
+          // Wait a bit to ensure OS files are written before killing the process
+          setTimeout(async () => {
+            await relaunch();
+          }, 1000);
+        } else {
+          isUpdatingRef.current = false; // Allow checking again later if user declined
         }
+      } else {
+        isUpdatingRef.current = false;
       }
     } catch (e) {
       console.error('Failed to check for updates:', e);
+      isUpdatingRef.current = false;
     }
   };
 
