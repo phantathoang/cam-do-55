@@ -29,4 +29,9 @@ src-tauri/gen/
 **/.DS_Store
 *.app
 *.dmg
+# Keys and Secrets
+.github/keys/
+*.key
+*.key.pub
+.env*
 .ai/
