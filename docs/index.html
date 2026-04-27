@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cầm Đồ 55 - Trợ lý Tài Chính Hiện Đại</title>
+    <meta name="description" content="Phần mềm quản lý tiệm cầm đồ cao cấp dành riêng cho macOS. Quản lý vốn, tự động tính lãi và tích hợp AI Telegram.">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' },
+                        surface: { 50: '#f8fafc', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #020617; color: #f8fafc; overflow-x: hidden; }
+        .glass-panel { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .gradient-text { background: linear-gradient(135deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow-bg { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(34,197,94,0.15) 0%, rgba(15,23,42,0) 70%); border-radius: 50%; filter: blur(60px); z-index: -1; }
+        .mockup-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Background Glows -->
+    <div class="glow-bg top-[-10%] left-[-10%]"></div>
+    <div class="glow-bg top-[40%] right-[-10%]"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b-0 border-t-0 border-l-0 border-r-0 border-b border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-blue-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-brand-500/20">55</div>
+                <span class="font-bold text-xl tracking-tight">Cầm Đồ 55</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#features" class="hover:text-white transition-colors">Tính năng</a>
+                <a href="#ai-agent" class="hover:text-white transition-colors">Trợ lý AI</a>
+                <a href="#security" class="hover:text-white transition-colors">Bảo mật</a>
+            </div>
+            <a href="https://github.com/phantathoang/cam-do-55/releases/latest" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all border border-white/10 hover:border-white/30 flex items-center gap-2">
+                <i class="ph ph-download-simple text-lg"></i> Tải macOS
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-40 pb-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 text-center z-10 relative">
+            <div data-aos="fade-up" data-aos-duration="1000">
+                <span class="inline-block py-1 px-3 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold uppercase tracking-wider mb-6">
+                    Phiên bản 1.0.0 đã ra mắt
+                </span>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+                    Quản lý cầm đồ <br />
+                    <span class="gradient-text">Chuẩn mực tương lai.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Trải nghiệm phần mềm quản lý tối giản, tốc độ cực cao dành riêng cho macOS. Tích hợp trí tuệ nhân tạo Telegram và bảo mật dữ liệu tuyệt đối.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="https://github.com/phantathoang/cam-do-55/releases/latest" class="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2 hover:-translate-y-1">
+                        <i class="ph-fill ph-apple-logo text-2xl"></i>
+                        Tải Miễn Phí (Apple Silicon)
+                    </a>
+                    <a href="#features" class="w-full sm:w-auto glass-panel hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-2">
+                        Khám phá tính năng
+                    </a>
+                </div>
+            </div>
+
+            <!-- App Mockup -->
+            <div class="mt-20 relative mx-auto max-w-5xl" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="200">
+                <div class="absolute inset-0 bg-gradient-to-b from-brand-500/20 to-transparent blur-3xl -z-10 rounded-full opacity-50"></div>
+                <img src="images/app-dashboard.png" alt="Cầm Đồ 55 Dashboard" class="rounded-2xl mockup-shadow border border-white/10 w-full object-cover">
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Box Features -->
+    <section id="features" class="py-24 bg-surface-900/50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Mọi thứ bạn cần. Không một chi tiết thừa.</h2>
+                <p class="text-slate-400">Được thiết kế tỉ mỉ để tối ưu hoá quy trình kinh doanh của bạn.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="glass-panel p-8 rounded-3xl col-span-1 md:col-span-2 relative overflow-hidden group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all"></div>
+                    <i class="ph-duotone ph-chart-line-up text-5xl text-blue-400 mb-6"></i>
+                    <h3 class="text-2xl font-bold mb-3">Kiểm soát dòng tiền</h3>
+                    <p class="text-slate-400 max-w-md">Theo dõi tổng vốn đang đưa, lãi tạm tính và các hợp đồng nợ xấu ngay trên màn hình chính với biểu đồ trực quan.</p>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="glass-panel p-8 rounded-3xl relative overflow-hidden group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all"></div>
+                    <i class="ph-duotone ph-calculator text-5xl text-orange-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Tự động tính lãi</h3>
+                    <p class="text-slate-400 text-sm">Hệ thống tự động cộng dồn và tính toán chính xác số ngày quá hạn, số tiền lãi phải thu theo từng chu kỳ.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-panel p-8 rounded-3xl relative overflow-hidden group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
+                    <i class="ph-duotone ph-bell-ringing text-5xl text-purple-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Thông báo macOS</h3>
+                    <p class="text-slate-400 text-sm">Nhận cảnh báo hợp đồng sắp đến hạn và nợ xấu thông qua Notification Center gốc của Apple.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-panel p-8 rounded-3xl col-span-1 md:col-span-2 relative overflow-hidden group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl group-hover:bg-brand-500/20 transition-all"></div>
+                    <i class="ph-duotone ph-kanban text-5xl text-brand-400 mb-6"></i>
+                    <h3 class="text-2xl font-bold mb-3">Bảng trạng thái Kanban</h3>
+                    <p class="text-slate-400 max-w-md">Quản lý vòng đời hợp đồng từ Đang Vay, Quá Hạn, đến Thanh Lý chỉ bằng một cái nhìn tổng thể.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Agent Section -->
+    <section id="ai-agent" class="py-24 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="w-full lg:w-1/2" data-aos="fade-right">
+                    <span class="text-blue-400 font-semibold tracking-wider uppercase text-sm mb-2 block">Tích hợp AI Độc Quyền</span>
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 leading-tight">Giao tiếp với tiệm của bạn qua <span class="text-blue-500">Telegram</span></h2>
+                    <p class="text-slate-400 text-lg mb-8 leading-relaxed">
+                        Bạn không cần phải mở máy tính để biết tình hình kinh doanh. Trợ lý AI Tiểu Nhị được tích hợp trực tiếp, hiểu ngôn ngữ tự nhiên và trả lời tức thì mọi câu hỏi của bạn.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-500 text-xl"></i> "Hôm nay có bao nhiêu hợp đồng quá hạn?"</li>
+                        <li class="flex items-center gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-500 text-xl"></i> "Tổng quỹ tiền mặt đang là bao nhiêu?"</li>
+                        <li class="flex items-center gap-3 text-slate-300"><i class="ph-fill ph-check-circle text-brand-500 text-xl"></i> Tự động gửi tin nhắn báo cáo cuối ngày.</li>
+                    </ul>
+                </div>
+                <div class="w-full lg:w-1/2 relative" data-aos="fade-left">
+                    <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"></div>
+                    <img src="images/telegram-agent.png" alt="Telegram AI Agent" class="relative z-10 rounded-3xl mockup-shadow border border-white/10 rotate-2 hover:rotate-0 transition-transform duration-500">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security & Auto Update -->
+    <section id="security" class="py-24 bg-surface-900/50">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-16" data-aos="fade-up">Bảo mật cấp độ doanh nghiệp</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 rounded-2xl flex items-center justify-center mb-6 border border-slate-700">
+                        <i class="ph-duotone ph-database text-3xl text-emerald-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Dữ Liệu Cục Bộ</h3>
+                    <p class="text-slate-400 text-sm">Toàn bộ dữ liệu khách hàng được lưu trữ offline bằng SQLite ngay trên máy Mac của bạn. Hoàn toàn không có rủi ro rò rỉ lên cloud.</p>
+                </div>
+
+                <div data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 rounded-2xl flex items-center justify-center mb-6 border border-slate-700">
+                        <i class="ph-duotone ph-arrows-clockwise text-3xl text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Cập Nhật Tự Động Ngầm</h3>
+                    <p class="text-slate-400 text-sm">Hệ thống Auto-Updater tích hợp sẵn. Cập nhật phiên bản mới nhất mượt mà, không gián đoạn công việc kinh doanh.</p>
+                </div>
+
+                <div data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 rounded-2xl flex items-center justify-center mb-6 border border-slate-700">
+                        <i class="ph-duotone ph-shield-check text-3xl text-brand-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Ký Điện Tử Ed25519</h3>
+                    <p class="text-slate-400 text-sm">Mọi bản cập nhật đều được bảo vệ bằng chữ ký điện tử mã hoá cấp cao, chống giả mạo phần mềm tuyệt đối.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-12 text-center">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-brand-500 to-blue-500 flex items-center justify-center font-bold text-xl mb-6 shadow-lg shadow-brand-500/20">55</div>
+            <h4 class="text-xl font-bold mb-2">Cầm Đồ 55</h4>
+            <p class="text-slate-500 text-sm mb-8">Nâng tầm hệ thống quản lý tài chính của bạn.</p>
+            <p class="text-slate-600 text-xs">&copy; 2026 Cầm Đồ 55. All rights reserved. Crafted for macOS.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 50 });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('bg-surface-950/80', 'shadow-lg');
+            } else {
+                nav.classList.remove('bg-surface-950/80', 'shadow-lg');
+            }
+        });
+    </script>
+</body>
+</html>
