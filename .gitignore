@@ -35,3 +35,5 @@ src-tauri/gen/
 *.key.pub
 .env*
 .ai/
+.ai/
+docs/*.md
