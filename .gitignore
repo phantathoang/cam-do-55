@@ -37,3 +37,7 @@ src-tauri/gen/
 .ai/
 .ai/
 docs/*.md
+telegram-agent/venv/
+telegram-agent/build/
+telegram-agent/dist/
+telegram-agent/*.spec
