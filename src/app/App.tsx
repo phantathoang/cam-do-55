@@ -94,9 +94,11 @@ function App() {
             switch (event.event) {
               case 'Started':
                 contentLength = event.data.contentLength || 0;
+                console.log(`Bắt đầu tải cập nhật, tổng dung lượng: ${contentLength}`);
                 break;
               case 'Progress':
                 downloaded += event.data.chunkLength;
+                console.log(`Đã tải: ${downloaded}/${contentLength}`);
                 break;
               case 'Finished':
                 toast.success('Cập nhật thành công! Đang khởi động lại...');
