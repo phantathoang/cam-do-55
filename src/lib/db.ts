@@ -153,7 +153,7 @@ export async function initDb() {
   // Seed default settings
   const shopName: any = await db.select("SELECT * FROM settings WHERE key = 'shop_name'");
   if (shopName.length === 0) {
-    await db.execute("INSERT INTO settings (key, value) VALUES ('shop_name', 'CAMDO55')");
+    await db.execute("INSERT INTO settings (key, value) VALUES ('shop_name', 'CẦM ĐỒ 55')");
     await db.execute("INSERT INTO settings (key, value) VALUES ('shop_address', '123 Đường Số 1, Quận 1, TP.HCM')");
     await db.execute("INSERT INTO settings (key, value) VALUES ('shop_phone', '0909090909')");
   }

@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="app-icon.png" alt="CamDo55 Logo" width="120" />
-  <h1>CamDo55</h1>
+  <img src="app-icon.png" alt="Cầm Đồ 55 Logo" width="120" />
+  <h1>Cầm Đồ 55</h1>
   <p><strong>Hệ Thống Quản Lý Cầm Đồ Hiện Đại & Bảo Mật</strong></p>
   <p>
     <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version" />
@@ -14,7 +14,7 @@
 
 ## 🌟 Giới thiệu
 
-**CamDo55** là một ứng dụng Desktop đa nền tảng (macOS & Windows) được thiết kế chuyên biệt để quản lý nghiệp vụ cầm đồ. Với giao diện tối giản, sang trọng (chuẩn BigTech) và hiệu năng cực cao, phần mềm giúp các chủ tiệm kiểm soát hợp đồng, theo dõi dòng tiền và quản lý khách hàng một cách thông minh, tự động hoá.
+**Cầm Đồ 55** là một ứng dụng Desktop đa nền tảng (macOS & Windows) được thiết kế chuyên biệt để quản lý nghiệp vụ cầm đồ. Với giao diện tối giản, sang trọng (chuẩn BigTech) và hiệu năng cực cao, phần mềm giúp các chủ tiệm kiểm soát hợp đồng, theo dõi dòng tiền và quản lý khách hàng một cách thông minh, tự động hoá.
 
 ## ✨ Tính năng nổi bật
 
@@ -50,4 +50,4 @@ Dự án được xây dựng trên những công nghệ hiện đại và tối
 - **CI/CD:** Tự động build và ký điện tử (Code Signing) bằng Github Actions.
 
 ---
-*Phát triển độc quyền cho Hệ thống CamDo55.*
+*Phát triển độc quyền cho Hệ thống Cầm Đồ 55.*

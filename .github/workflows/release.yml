@@ -55,7 +55,7 @@ jobs:
           VITE_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'CamDo55 - Bản cập nhật ${{ github.ref_name }}'
+          releaseName: 'Cầm Đồ 55 - Bản cập nhật ${{ github.ref_name }}'
           releaseBody: 'Xem thông tin bản cập nhật để biết thêm chi tiết.'
           releaseDraft: false
           prerelease: false

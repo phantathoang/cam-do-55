@@ -98,7 +98,7 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
       
         if (update) {
         const yes = await ask(`Có bản cập nhật mới (v${update.version}). Bạn có muốn tải về và cài đặt ngay không?`, {
-            title: 'Cập nhật CamDo55',
+            title: 'Cập nhật Cầm Đồ 55',
             kind: 'info',
             okLabel: 'Cập nhật ngay',
             cancelLabel: 'Để sau'
@@ -237,7 +237,7 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
         if (confirmed) {
           await invoke('restore_database', { backupPathStr: selected });
           await message("Đã phục hồi dữ liệu thành công! Ứng dụng sẽ tự động khởi động lại.", {
-            title: "CamDo55 - Phục Hồi Thành Công",
+            title: "Cầm Đồ 55 - Phục Hồi Thành Công",
             kind: "info"
           });
           window.location.reload();
@@ -367,7 +367,7 @@ export default function AdminPanel({ onClose, initialTab = 'settings' }: { onClo
                       value={shopName}
                       onChange={e => setShopName(e.target.value)}
                       className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-purple-500 outline-none transition-colors text-slate-200"
-                      placeholder="VD: CAMDO55"
+                      placeholder="VD: CẦM ĐỒ 55"
                     />
                   </div>
                   <div className="space-y-1 group">
