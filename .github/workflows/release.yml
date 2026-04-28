@@ -48,56 +48,68 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_PRIVATE_KEY: "dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5Q3I3eDFRaWFZM1A2SDMzakNxdHZnbVlJb25hbXRiU1FDZU96cUFxaVpDY0FBQkFBQUFBQUFBQUFBQUlBQUFBQUoweGxNVThSQ0xEMVBmZmFuaGpUZVBZYXZELzVUWGtvcEFndUFjNk0rc1RLSmFuWktzcldNWmxUc2ttVzJXYndFYkl4Z1ZCT0hiUTZGMzJtK3EwNEVoVTBleWF3U3lEQU9kdEx1NWRlaXNocHY2d0lMT1VJWE5qR096UC9yNmZjbmViMWRBeVJHVms9Cg=="
-          TAURI_KEY_PASSWORD: ""
-          TAURI_SIGNING_PRIVATE_KEY: "dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5Q3I3eDFRaWFZM1A2SDMzakNxdHZnbVlJb25hbXRiU1FDZU96cUFxaVpDY0FBQkFBQUFBQUFBQUFBQUlBQUFBQUoweGxNVThSQ0xEMVBmZmFuaGpUZVBZYXZELzVUWGtvcEFndUFjNk0rc1RLSmFuWktzcldNWmxUc2ttVzJXYndFYkl4Z1ZCT0hiUTZGMzJtK3EwNEVoVTBleWF3U3lEQU9kdEx1NWRlaXNocHY2d0lMT1VJWE5qR096UC9yNmZjbmViMWRBeVJHVms9Cg=="
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           VITE_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'Cầm Đồ 55 - Bản cập nhật ${{ github.ref_name }}'
+          releaseName: 'CamDo55 - Bản cập nhật ${{ github.ref_name }}'
           releaseBody: 'Xem thông tin bản cập nhật để biết thêm chi tiết.'
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: false
           args: --verbose
 
-      - name: Debug Output Artifacts (macOS only)
-        if: matrix.platform == 'macos-latest'
+  publish-updater:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate universal latest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Listing all files in src-tauri/target/release/bundle/macos/"
-          ls -la src-tauri/target/release/bundle/macos/ || true
+          pip install requests
+          python -c '
+          import os, requests, json
+          token = os.environ.get("GITHUB_TOKEN")
+          repo = "${{ github.repository }}"
+          tag = "${{ github.ref_name }}"
+          headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"} if token else {}
+          res = requests.get(f"https://api.github.com/repos/{repo}/releases/tags/{tag}", headers=headers)
+          res.raise_for_status()
+          assets = res.json()["assets"]
           
-          echo "Generating latest.json manually..."
-          SIG_FILE=$(find src-tauri/target/release/bundle/macos -name "*.app.tar.gz.sig" | head -n 1)
-          if [ -f "$SIG_FILE" ]; then
-            SIG=$(<"$SIG_FILE")
-            VERSION="${{ github.ref_name }}"
-            VERSION=${VERSION#v}
-            URL="https://github.com/phantathoang/cam-do-55/releases/download/${{ github.ref_name }}/C.m.D.55_aarch64.app.tar.gz"
-            
-            echo '{
-              "version": "'"$VERSION"'",
-              "notes": "Bản cập nhật '"$VERSION"'",
-              "pub_date": "'"$(date -u +"%Y-%m-%dT%H:%M:%SZ")"'",
-              "platforms": {
-                "darwin-aarch64": {
-                  "signature": "'"$SIG"'",
-                  "url": "'"$URL"'"
-                },
-                "darwin-x86_64": {
-                  "signature": "'"$SIG"'",
-                  "url": "'"$URL"'"
-                }
-              }
-            }' > latest.json
-            cat latest.json
-          else
-            echo "ERROR: Signature file not found! tauri build failed to sign."
-          fi
+          platforms = {}
+          version = tag.lstrip("v")
+          
+          for asset in assets:
+              name = asset["name"]
+              url = asset["browser_download_url"]
+              if name.endswith(".sig"):
+                  sig_res = requests.get(url)
+                  sig = sig_res.text.strip()
+                  
+                  if "aarch64" in name and "tar.gz.sig" in name:
+                      platforms["darwin-aarch64"] = {"signature": sig, "url": url.replace(".sig", "")}
+                      platforms["darwin-x86_64"] = {"signature": sig, "url": url.replace(".sig", "")}
+                  elif "x64" in name and "zip.sig" in name:
+                      platforms["windows-x86_64"] = {"signature": sig, "url": url.replace(".sig", "")}
+                      
+          latest = {
+              "version": version,
+              "notes": f"Bản cập nhật {version}",
+              "pub_date": res.json()["published_at"],
+              "platforms": platforms
+          }
+          
+          with open("latest.json", "w") as f:
+              json.dump(latest, f, indent=2)
+          '
+          cat latest.json
 
-      - name: Upload latest.json to Release (macOS only)
-        if: matrix.platform == 'macos-latest'
+      - name: Upload latest.json to Release
         uses: softprops/action-gh-release@v2
         with:
           files: latest.json

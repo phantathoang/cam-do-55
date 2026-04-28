@@ -39,7 +39,7 @@ export default function LoginView() {
           <div className="w-16 h-16 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-emerald-500" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-100">Cầm Đồ 55</h1>
+          <h1 className="text-2xl font-bold text-slate-100">CamDo55</h1>
           <p className="text-slate-400 mt-2">Hệ thống quản lý tài chính chuyên nghiệp</p>
         </div>
 

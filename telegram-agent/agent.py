@@ -407,8 +407,7 @@ available_functions = {
     "create_contract": create_contract,
 }
 
-SYSTEM_PROMPT = """Bạn là trợ lý AI quản lý tiệm Cầm Đồ 55. Bạn có thể tra cứu hợp đồng, tính toán tiền lãi, tái ký, tất toán, tạo hợp đồng mới và thanh lý hợp đồng. 
-
+SYSTEM_PROMPT = """Bạn là trợ lý AI quản lý tiệm CamDo55. Bạn có thể tra cứu hợp đồng, tính toán tiền lãi, tái ký, tất toán, tạo hợp đồng mới và thanh lý hợp đồng. 
 Khi tạo hợp đồng mới: Dùng `create_contract`. Lưu ý: Tất cả hợp đồng thêm mới qua Telegram đều mặc định là "Hợp đồng Tín chấp". Nếu khách không nói ngày thì không truyền `start_date` (mặc định hôm nay). Nếu không nói lãi thì không truyền `interest_rate` (mặc định 2000).
 
 Quy trình tái ký (Đóng lãi): 
@@ -457,7 +456,7 @@ messages_memory = {}
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = str(update.message.chat_id)
     if not is_authorized(chat_id):
-        await update.message.reply_text("⛔️ Xin lỗi, bạn không có quyền truy cập hệ thống quản lý Cầm Đồ 55.")
+        await update.message.reply_text("⛔️ Xin lỗi, bạn không có quyền truy cập hệ thống quản lý CamDo55.")
         return
 
     user_id = update.message.from_user.id
@@ -659,10 +658,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = str(update.message.chat_id)
     
     if not is_authorized(chat_id):
-        await update.message.reply_text("⛔️ Xin lỗi, bạn không có quyền truy cập hệ thống quản lý Cầm Đồ 55.")
+        await update.message.reply_text("⛔️ Xin lỗi, bạn không có quyền truy cập hệ thống quản lý CamDo55.")
         return
         
-    await update.message.reply_text("Chào đại ca! Em là Trợ lý Cầm Đồ 55. Đại ca cần em tra cứu hay xử lý hợp đồng nào ạ?")
+    await update.message.reply_text("Chào đại ca! Em là Trợ lý CamDo55. Đại ca cần em tra cứu hay xử lý hợp đồng nào ạ?")
 
 import fcntl
 import sys

@@ -78,7 +78,7 @@ function App() {
       const update = await check();
       if (update) {
         const yes = await ask(`Có bản cập nhật mới (v${update.version}). Bạn có muốn tải về và cài đặt ngay không?`, {
-            title: 'Cập nhật Cầm Đồ 55',
+            title: 'Cập nhật CamDo55',
             kind: 'info',
             okLabel: 'Cập nhật ngay',
             cancelLabel: 'Để sau'
@@ -212,7 +212,7 @@ function App() {
               <span className="font-bold text-lg text-white">55</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">Cầm Đồ 55</h1>
+              <h1 className="text-xl font-bold tracking-tight text-white">CamDo55</h1>
               <p className="text-xs text-slate-400 font-medium tracking-wide">SYSTEM PREMIUM {appVersion && `(v${appVersion})`}</p>
             </div>
           </div>

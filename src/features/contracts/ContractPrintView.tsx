@@ -50,7 +50,7 @@ export default function ContractPrintView({ contract, onClose }: Props) {
   const { settings, currentUser } = useAppStore();
 
   const shopData = {
-    name: settings.shop_name || 'CẦM ĐỒ 55',
+    name: settings.shop_name || 'CAMDO55',
     address: settings.shop_address || '.......................................................................',
     phone: settings.shop_phone || '....................',
     owner: currentUser?.full_name || '.........................................',

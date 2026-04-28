@@ -110,7 +110,7 @@ pub fn run() {
                 .menu(&menu)
                 .show_menu_on_left_click(true)
                 .icon(app.default_window_icon().unwrap().clone())
-                .tooltip("Cầm Đồ 55")
+                .tooltip("CamDo55")
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "quit" => {
                         app.exit(0);
