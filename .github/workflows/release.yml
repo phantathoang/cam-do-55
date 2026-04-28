@@ -59,7 +59,7 @@ jobs:
           releaseBody: 'Xem thông tin bản cập nhật để biết thêm chi tiết.'
           releaseDraft: false
           prerelease: false
-          includeUpdaterJson: true
+          includeUpdaterJson: false
           args: --verbose
 
       - name: Debug Output Artifacts (macOS only)
