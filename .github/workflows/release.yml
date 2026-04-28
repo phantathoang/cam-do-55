@@ -39,7 +39,7 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
           pyinstaller agent.spec
-          copy dist\telegram-agent.exe ..\src-tauri\telegram-agent-x86_64-pc-windows-msvc.exe
+          copy dist\agent.exe ..\src-tauri\telegram-agent-x86_64-pc-windows-msvc.exe
 
       - name: Install frontend dependencies
         run: npm install
