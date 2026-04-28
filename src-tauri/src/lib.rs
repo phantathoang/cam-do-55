@@ -158,5 +158,14 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|_app_handle, _event| {});
+        .run(|app_handle, event| match event {
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { .. } => {
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
+            _ => {}
+        });
 }
