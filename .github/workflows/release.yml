@@ -44,13 +44,26 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      - name: Format Private Key
+        shell: bash
+        env:
+          RAW_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+        run: |
+          if [[ "$RAW_KEY" != *" "* ]]; then
+            CLEANED_KEY=$(echo "$RAW_KEY" | tr -d '\n' | tr -d '\r' | tr -d ' ')
+          else
+            CLEANED_KEY=$(echo "$RAW_KEY" | tr -d '\r')
+          fi
+          echo "$CLEANED_KEY" > tauri_private.key
+          echo "TAURI_KEY_PATH=${GITHUB_WORKSPACE}/tauri_private.key" >> $GITHUB_ENV
+
       - name: Build and Release Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_PRIVATE_KEY: ${{ env.TAURI_KEY_PATH }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ env.TAURI_KEY_PATH }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           VITE_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         with:
