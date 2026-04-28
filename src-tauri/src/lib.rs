@@ -1,7 +1,7 @@
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
-    Emitter, Manager, RunEvent, WindowEvent,
+    Emitter, Manager, WindowEvent,
 };
 
 #[tauri::command]
@@ -158,14 +158,5 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|app_handle, event| match event {
-            RunEvent::Reopen { .. } | RunEvent::Opened { .. } => {
-                // When clicking dock icon on macOS
-                if let Some(window) = app_handle.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
-            }
-            _ => {}
-        });
+        .run(|_app_handle, _event| {});
 }
