@@ -10,7 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, windows-latest]
+        include:
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin --bundles app,dmg'
+          - platform: 'windows-latest'
+            args: '--bundles nsis'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -65,7 +69,7 @@ jobs:
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: false
-          args: --verbose
+          args: --verbose ${{ matrix.args }}
 
   publish-updater:
     needs: release
@@ -99,7 +103,7 @@ jobs:
                   if "aarch64" in name and "tar.gz.sig" in name:
                       platforms["darwin-aarch64"] = {"signature": sig, "url": url.replace(".sig", "")}
                       platforms["darwin-x86_64"] = {"signature": sig, "url": url.replace(".sig", "")}
-                  elif "x64" in name and "zip.sig" in name:
+                  elif "x64" in name and ("zip.sig" in name or "exe.sig" in name):
                       platforms["windows-x86_64"] = {"signature": sig, "url": url.replace(".sig", "")}
                       
           latest = {
