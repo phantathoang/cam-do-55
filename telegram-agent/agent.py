@@ -246,6 +246,8 @@ def get_contracts_status(status_filter: str = None):
         
         if r['status'] in ('Đã xong', 'Thanh Lý', 'Thanh lý'):
             r['alert_status'] = r['status']
+        elif r['status'].lower() == 'quá hạn':
+            r['alert_status'] = 'Quá hạn'
         elif days >= 39 and is_the_chap:
             r['alert_status'] = 'Thanh lý'
         elif days >= 31:
@@ -257,19 +259,24 @@ def get_contracts_status(status_filter: str = None):
         else:
             r['alert_status'] = 'Bình thường'
             
-        # Lọc theo status_filter
+        # Lọc theo status_filter để khớp với logic các Tab trên giao diện
         if status_filter:
             sf = status_filter.lower()
             if sf == 'đang vay' or sf == 'tất cả':
-                if r['status'] in ('Đã xong', 'Thanh Lý', 'Thanh lý'):
+                # Đang vay: Bao gồm Đang chờ và Quá hạn (nhưng không tính Đã xong, Thanh lý)
+                if r['status'] in ('Đã xong', 'Thanh Lý', 'Thanh lý') or r['alert_status'] == 'Thanh lý':
                     continue
             elif sf == 'đã xong':
                 if r['status'] != 'Đã xong': continue
             elif sf == 'thanh lý':
                 if r['status'] not in ('Thanh Lý', 'Thanh lý') and r['alert_status'] != 'Thanh lý': continue
             elif sf == 'đang chờ':
+                # Đang chờ: Chỉ những hợp đồng chưa quá hạn
                 if r['status'].lower() != 'đang chờ': continue
-            elif sf in ('sắp đến hạn', 'đến hạn', 'quá hạn', 'bình thường'):
+                if r['alert_status'] in ('Quá hạn', 'Thanh lý'): continue
+            elif sf == 'quá hạn':
+                if r['alert_status'] != 'Quá hạn': continue
+            elif sf in ('sắp đến hạn', 'đến hạn', 'bình thường'):
                 if r['alert_status'].lower() != sf:
                     continue
                     
