@@ -251,6 +251,8 @@ def get_contracts_status(status_filter: str = None):
                 if r['status'] != 'Đã xong': continue
             elif sf == 'thanh lý':
                 if r['status'] not in ('Thanh Lý', 'Thanh lý') and r['alert_status'] != 'Thanh lý': continue
+            elif sf == 'đang chờ':
+                if r['status'].lower() != 'đang chờ': continue
             elif sf in ('sắp đến hạn', 'đến hạn', 'quá hạn', 'bình thường'):
                 if r['alert_status'].lower() != sf:
                     continue
@@ -334,7 +336,7 @@ tools = [
                 "properties": {
                     "status_filter": {
                         "type": "string",
-                        "description": "BẮT BUỘC chọn 1 trong: 'Đang vay' (tất cả HĐ đang cầm), 'Đã xong' (đã tất toán), 'Thanh lý', 'Quá hạn', 'Đến hạn', 'Sắp đến hạn'."
+                        "description": "BẮT BUỘC chọn 1 trong: 'Đang vay' (tất cả HĐ đang cầm), 'Đang chờ' (trạng thái bình thường), 'Đã xong' (đã tất toán), 'Thanh lý', 'Quá hạn', 'Đến hạn', 'Sắp đến hạn'."
                     }
                 },
                 "required": ["status_filter"]
@@ -437,6 +439,7 @@ Mọi phân tích ngôn ngữ tự nhiên của bạn cần được map chính 
 - Khi hỏi "Có bao nhiêu hợp đồng đang vay?", "Danh sách đang vay": Gọi `get_contracts_status` với `status_filter="Đang vay"`. Bạn sẽ nhận được tổng số lượng (`total_count`), tổng tiền (`total_amount`), và danh sách.
 - Khi hỏi "Hợp đồng đã xong", "Tất toán": Gọi `get_contracts_status` với `status_filter="Đã xong"`.
 - Khi hỏi "Hợp đồng thanh lý": Gọi `get_contracts_status` với `status_filter="Thanh lý"`.
+- Khi hỏi "Hợp đồng đang chờ", "Trạng thái đang chờ": Gọi `get_contracts_status` với `status_filter="Đang chờ"`.
 - Khi tra cứu rủi ro: Dùng `status_filter="Quá hạn"`, "Đến hạn", "Sắp đến hạn".
 Lưu ý: Chỉ in ra thông tin dựa trên kết quả trả về. Luôn hiển thị tổng số lượng và tổng tiền ở đầu danh sách (định dạng số tiền có dấu phẩy cho dễ đọc).
 
