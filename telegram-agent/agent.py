@@ -14,8 +14,24 @@ import certifi
 # Fix for PyInstaller SSL
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
+import platform
+
+def get_app_data_dir():
+    app_name = "com.hoangtat.cam-do-55"
+    system = platform.system()
+    if system == "Windows":
+        base_dir = os.environ.get("APPDATA", os.path.expanduser("~\\AppData\\Roaming"))
+        return os.path.join(base_dir, app_name)
+    elif system == "Darwin":
+        return os.path.expanduser(f"~/Library/Application Support/{app_name}")
+    else:
+        return os.path.expanduser(f"~/.config/{app_name}")
+
+APP_DATA_DIR = get_app_data_dir()
+os.makedirs(APP_DATA_DIR, exist_ok=True)
+
 logging.basicConfig(
-    filename=os.path.expanduser('~/Library/Application Support/com.hoangtat.cam-do-55/agent.log'),
+    filename=os.path.join(APP_DATA_DIR, 'agent.log'),
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
@@ -27,7 +43,7 @@ load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 ADMIN_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 MODEL_NAME = os.getenv("LLM_MODEL", "gpt-4o-mini")
-DB_PATH = os.path.expanduser('~/Library/Application Support/com.hoangtat.cam-do-55/cd_app.db')
+DB_PATH = os.path.join(APP_DATA_DIR, 'cd_app.db')
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, timeout=20.0) # wait if locked
@@ -561,7 +577,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"Sending reply: {response_message.content}")
         await update.message.reply_text(response_message.content)
 
-ADMIN_CHAT_ID_FILE = os.path.expanduser('~/Library/Application Support/com.hoangtat.cam-do-55/admin_chat_id.txt')
+ADMIN_CHAT_ID_FILE = os.path.join(APP_DATA_DIR, 'admin_chat_id.txt')
 
 def save_admin_chat_id(chat_id):
     with open(ADMIN_CHAT_ID_FILE, 'w') as f:
@@ -695,7 +711,7 @@ def acquire_single_instance_lock():
     global _lock_file
     import os
     import time
-    lock_path = os.path.expanduser('~/Library/Application Support/com.hoangtat.cam-do-55/agent.lock')
+    lock_path = os.path.join(APP_DATA_DIR, 'agent.lock')
     os.makedirs(os.path.dirname(lock_path), exist_ok=True)
     _lock_file = open(lock_path, 'w')
     
