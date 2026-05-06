@@ -201,15 +201,24 @@ def liquidate_contract(contract_id: str):
 
 def get_contracts_status(status_filter: str = None):
     """
-    Tra cứu hợp đồng theo tình trạng (sắp đến hạn, quá hạn).
-    Một hợp đồng có thời hạn mặc định là 30 ngày.
+    Tra cứu hợp đồng theo các trạng thái: Đang vay (tất cả chưa tất toán), Đã xong, Thanh lý, Sắp đến hạn, Đến hạn, Quá hạn.
     """
     with closing(get_db()) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT c.*, cus.name as customer_name, cus.phone as customer_phone FROM contracts c JOIN customers cus ON c.customer_id = cus.id WHERE c.status NOT IN ('Đã xong', 'Thanh Lý')")
+        base_query = "SELECT c.*, cus.name as customer_name, cus.phone as customer_phone FROM contracts c JOIN customers cus ON c.customer_id = cus.id"
+        
+        if status_filter and status_filter.lower() == 'đã xong':
+            cursor.execute(f"{base_query} WHERE c.status = 'Đã xong'")
+        elif status_filter and status_filter.lower() == 'thanh lý':
+            cursor.execute(f"{base_query} WHERE c.status IN ('Thanh Lý', 'Thanh lý')")
+        else: # Đang vay or specific alert_status
+            cursor.execute(f"{base_query} WHERE c.status NOT IN ('Đã xong', 'Thanh Lý', 'Thanh lý')")
+            
         rows = cursor.fetchall()
     
     results = []
+    total_amount = 0
+    
     for row in rows:
         r = dict(row)
         days = calculate_days(r['start_date'])
@@ -219,7 +228,9 @@ def get_contracts_status(status_filter: str = None):
         
         is_the_chap = r['asset'] and 'Tín chấp' not in r['asset']
         
-        if days >= 39 and is_the_chap:
+        if r['status'] in ('Đã xong', 'Thanh Lý', 'Thanh lý'):
+            r['alert_status'] = r['status']
+        elif days >= 39 and is_the_chap:
             r['alert_status'] = 'Thanh lý'
         elif days >= 31:
             r['alert_status'] = 'Quá hạn'
@@ -230,22 +241,34 @@ def get_contracts_status(status_filter: str = None):
         else:
             r['alert_status'] = 'Bình thường'
             
-        # Nếu có status_filter, chỉ giữ lại những thằng khớp
-        if status_filter and status_filter.lower() != 'tất cả':
-            if r['alert_status'].lower() != status_filter.lower():
-                continue
-        # Bỏ qua các hợp đồng 'Bình thường' để tránh quá tải token của LLM
-        elif r['alert_status'] == 'Bình thường':
-            continue
-            
+        # Lọc theo status_filter
+        if status_filter:
+            sf = status_filter.lower()
+            if sf == 'đang vay' or sf == 'tất cả':
+                if r['status'] in ('Đã xong', 'Thanh Lý', 'Thanh lý'):
+                    continue
+            elif sf == 'đã xong':
+                if r['status'] != 'Đã xong': continue
+            elif sf == 'thanh lý':
+                if r['status'] not in ('Thanh Lý', 'Thanh lý') and r['alert_status'] != 'Thanh lý': continue
+            elif sf in ('sắp đến hạn', 'đến hạn', 'quá hạn', 'bình thường'):
+                if r['alert_status'].lower() != sf:
+                    continue
+                    
         results.append(r)
+        total_amount += r['amount']
         
-    # Sắp xếp kết quả: Quá hạn -> Đến hạn -> Sắp đến hạn -> Thanh lý
-    # Để khi trả về LLM, những cái quan trọng (Quá hạn) nằm trên cùng
-    order = {'Quá hạn': 1, 'Thanh lý': 2, 'Đến hạn': 3, 'Sắp đến hạn': 4, 'Bình thường': 5}
-    results.sort(key=lambda x: order.get(x['alert_status'], 99))
+    order = {'Quá hạn': 1, 'Thanh lý': 2, 'Đến hạn': 3, 'Sắp đến hạn': 4, 'Bình thường': 5, 'Đã xong': 6}
+    results.sort(key=lambda x: order.get(x.get('alert_status', 'Bình thường'), 99))
     
-    return json.dumps(results, ensure_ascii=False)
+    summary = {
+        "status_requested": status_filter or "Tất cả",
+        "total_count": len(results),
+        "total_amount": total_amount,
+        "contracts": results[:30] # Limit to 30 to avoid token limits
+    }
+    
+    return json.dumps(summary, ensure_ascii=False)
 
 def create_contract(customer_name: str, amount: float, start_date: str = None, interest_rate: float = 2000):
     """
@@ -291,11 +314,11 @@ tools = [
         "type": "function",
         "function": {
             "name": "get_contracts_by_customer",
-            "description": "Tìm kiếm hợp đồng của khách hàng bằng tên hoặc số điện thoại.",
+            "description": "Tra cứu hợp đồng theo tên khách hàng hoặc số điện thoại.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "Tên hoặc SĐT của khách."}
+                    "query": {"type": "string", "description": "Tên hoặc SĐT của khách hàng."}
                 },
                 "required": ["query"]
             }
@@ -304,13 +327,30 @@ tools = [
     {
         "type": "function",
         "function": {
+            "name": "get_contracts_status",
+            "description": "Tra cứu, thống kê số lượng và danh sách hợp đồng theo các tình trạng (Đang vay, Đã xong, Thanh lý...). Trả về tổng số hợp đồng, tổng tiền và danh sách.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "status_filter": {
+                        "type": "string",
+                        "description": "BẮT BUỘC chọn 1 trong: 'Đang vay' (tất cả HĐ đang cầm), 'Đã xong' (đã tất toán), 'Thanh lý', 'Quá hạn', 'Đến hạn', 'Sắp đến hạn'."
+                    }
+                },
+                "required": ["status_filter"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "auto_calc_renew",
-            "description": "Tính toán tiền lãi và gợi ý tái ký dựa trên số tiền khách đóng.",
+            "description": "Trợ lý tính toán khi khách đóng tiền lãi. Đưa vào mã hợp đồng và số tiền khách đóng, hàm sẽ tự tính toán lãi thực tế và gợi ý các tác vụ như Lãi nhập gốc, Ghi nợ tồn, Giảm nợ gốc.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "contract_id": {"type": "string", "description": "Mã hợp đồng (HDCD-...)"},
-                    "amount_paid": {"type": "number", "description": "Số tiền khách trả."}
+                    "amount_paid": {"type": "number", "description": "Số tiền khách đóng (VNĐ)."}
                 },
                 "required": ["contract_id", "amount_paid"]
             }
@@ -320,14 +360,14 @@ tools = [
         "type": "function",
         "function": {
             "name": "execute_renew_action",
-            "description": "Thực hiện thao tác tái ký hợp đồng sau khi đã chọn được action_type phù hợp.",
+            "description": "Thực hiện thao tác tái ký/đóng lãi (Lãi nhập gốc, Ghi nợ tồn, Giảm nợ gốc, hoặc Đóng đủ lãi) sau khi Đại ca đã chọn phương án từ hàm auto_calc_renew.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "contract_id": {"type": "string", "description": "Mã hợp đồng cũ"},
-                    "action_type": {"type": "string", "enum": ["match", "decrease_principal", "increase_principal", "debt"]},
-                    "new_amount": {"type": "number", "description": "Số nợ gốc của hợp đồng mới"},
-                    "diff": {"type": "number", "description": "Số tiền dư hoặc thiếu (âm nếu thiếu). Bắt buộc nếu là debt."}
+                    "contract_id": {"type": "string", "description": "Mã hợp đồng cũ đang vay"},
+                    "action_type": {"type": "string", "enum": ["match", "decrease_principal", "increase_principal", "debt"], "description": "match (Đủ lãi), decrease_principal (Giảm nợ gốc), increase_principal (Lãi nhập gốc), debt (Ghi nợ tồn)"},
+                    "new_amount": {"type": "number", "description": "Số nợ gốc của hợp đồng Tái ký mới."},
+                    "diff": {"type": "number", "description": "Số dư hoặc thiếu (số âm nếu thiếu). Cần thiết để ghi nợ tồn."}
                 },
                 "required": ["contract_id", "action_type", "new_amount"]
             }
@@ -337,7 +377,7 @@ tools = [
         "type": "function",
         "function": {
             "name": "close_contract",
-            "description": "Tất toán toàn bộ hợp đồng, trả đồ cho khách (chỉ làm việc này nếu khách yêu cầu chuộc đồ).",
+            "description": "Tất toán toàn bộ hợp đồng, trả đồ cho khách (chỉ làm việc này nếu khách yêu cầu chuộc đồ/tất toán).",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -358,23 +398,6 @@ tools = [
                     "contract_id": {"type": "string"}
                 },
                 "required": ["contract_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_contracts_status",
-            "description": "Thống kê tình trạng các hợp đồng để xem cái nào Sắp đến hạn, Đến hạn, hoặc Quá hạn (dựa trên chu kỳ 30 ngày).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "status_filter": {
-                        "type": "string",
-                        "description": "Lọc các hợp đồng theo tình trạng cụ thể. BẮT BUỘC chọn 1 trong: 'Sắp đến hạn', 'Đến hạn', 'Quá hạn', 'Thanh lý', hoặc 'Tất cả' (nếu muốn xem hết)."
-                    }
-                },
-                "required": ["status_filter"]
             }
         }
     },
@@ -407,49 +430,48 @@ available_functions = {
     "create_contract": create_contract,
 }
 
-SYSTEM_PROMPT = """Bạn là trợ lý AI quản lý tiệm Cầm Đồ 55. Bạn có thể tra cứu hợp đồng, tính toán tiền lãi, tái ký, tất toán, tạo hợp đồng mới và thanh lý hợp đồng. 
-Khi tạo hợp đồng mới: Dùng `create_contract`. Lưu ý: Tất cả hợp đồng thêm mới qua Telegram đều mặc định là "Hợp đồng Tín chấp". Nếu khách không nói ngày thì không truyền `start_date` (mặc định hôm nay). Nếu không nói lãi thì không truyền `interest_rate` (mặc định 2000).
+SYSTEM_PROMPT = """Bạn là trợ lý AI quản lý tiệm Cầm Đồ 55. Bạn có thể tra cứu hợp đồng, tính toán tiền lãi, tái ký, đóng lãi, tất toán, tạo hợp đồng mới và thanh lý.
+Mọi phân tích ngôn ngữ tự nhiên của bạn cần được map chính xác với các Function Tool.
 
-Quy trình tái ký (Đóng lãi): 
-1. Khách báo đóng X tiền -> Dùng `auto_calc_renew` để lấy gợi ý. 
-2. Trình bày các lựa chọn cho người dùng (Khách đóng dư/thiếu/đủ ra sao). 
-3. Chờ chủ tiệm xác nhận chọn phương án nào (VD: Chọn phương án A - Lãi nhập gốc).
-4. Dùng `execute_renew_action` để thực hiện theo ý chủ tiệm.
+1. TRA CỨU HỢP ĐỒNG:
+- Khi hỏi "Có bao nhiêu hợp đồng đang vay?", "Danh sách đang vay": Gọi `get_contracts_status` với `status_filter="Đang vay"`. Bạn sẽ nhận được tổng số lượng (`total_count`), tổng tiền (`total_amount`), và danh sách.
+- Khi hỏi "Hợp đồng đã xong", "Tất toán": Gọi `get_contracts_status` với `status_filter="Đã xong"`.
+- Khi hỏi "Hợp đồng thanh lý": Gọi `get_contracts_status` với `status_filter="Thanh lý"`.
+- Khi tra cứu rủi ro: Dùng `status_filter="Quá hạn"`, "Đến hạn", "Sắp đến hạn".
+Lưu ý: Chỉ in ra thông tin dựa trên kết quả trả về. Luôn hiển thị tổng số lượng và tổng tiền ở đầu danh sách (định dạng số tiền có dấu phẩy cho dễ đọc).
 
-LƯU Ý CỰC KỲ QUAN TRỌNG KHI GỌI HÀM `get_contracts_status`:
-- Khách hỏi "đến hạn" -> BẮT BUỘC gọi `status_filter="Đến hạn"`. Tuyệt đối không gọi "Tất cả" hay "Quá hạn".
-- Khách hỏi "quá hạn" -> BẮT BUỘC gọi `status_filter="Quá hạn"`.
-- Khách hỏi "sắp đến hạn" -> BẮT BUỘC gọi `status_filter="Sắp đến hạn"`.
-- Chỉ xuất ra ĐÚNG những hợp đồng mà hàm trả về. Không tự biên tự diễn tình trạng.
+2. ĐÓNG LÃI & TÁI KÝ (TRỢ LÝ TÍNH TOÁN):
+Khi Đại ca đưa thông tin khách đóng tiền (VD: "Khách hợp đồng HDCD-xxx đóng 500k"):
+- Bước 1: Gọi `auto_calc_renew` với `contract_id` và `amount_paid`. Tool sẽ tự tính toán tiền lãi thực tế và đưa ra các tác vụ tương ứng (lãi nhập gốc, ghi nợ tồn, giảm nợ gốc...).
+- Bước 2: Hiển thị RÕ RÀNG các phương án (Action) cho Đại ca chọn. (Ví dụ: "Phương án 1: Lãi nhập gốc (tăng gốc) | Phương án 2: Ghi nợ tồn").
+- Bước 3: Đợi Đại ca chọn phương án.
+- Bước 4: Gọi `execute_renew_action` với `action_type` tương ứng.
+
+3. TẠO MỚI / TẤT TOÁN / THANH LÝ:
+- Tạo mới: Gọi `create_contract`. Mặc định "Tín chấp", lãi 2000đ nếu không có thông tin.
+- Tất toán: Gọi `close_contract` khi khách chuộc đồ và kết thúc hợp đồng.
+- Thanh lý: Gọi `liquidate_contract` để đưa vào kho thanh lý.
 
 QUY TẮC HIỂN THỊ (BẮT BUỘC):
-1. Danh sách hợp đồng (tra cứu hoặc báo cáo) phải theo format:
-📊 DANH SÁCH HỢP ĐỒNG ({số lượng})
+1. Danh sách hợp đồng (luôn format đẹp mắt):
+📊 DANH SÁCH HỢP ĐỒNG: {status_requested}
+Tổng cộng: {total_count} hợp đồng | Tổng tiền: {total_amount}đ
 
 ━━━━━━━━━━━━━━━━━━
 📄 Mã: {contract_id}
-👤 {customer_name}
+👤 {customer_name} - 📱 {customer_phone}
 💰 {amount}đ
-📅 {current_days} ngày | {status_icon} {alert_status}
-📌 {status}
+📅 {current_days} ngày | 💵 Lãi dự kiến: {expected_interest}đ | {alert_status}
+📌 Trạng thái: {status}
 ━━━━━━━━━━━━━━━━━━
 
-2. Khi thông báo thành công (Tạo mới, Tất toán, Tái ký, Thanh lý), luôn dùng format:
+2. Báo cáo thành công (Tạo mới, Tất toán, Tái ký):
 ✅ ĐÃ THỰC HIỆN THÀNH CÔNG
-
 ━━━━━━━━━━━━━━━━━━
 📄 Mã HĐ: {contract_id}
-👤 Khách hàng: {customer_name}
-💰 Số tiền: {amount}đ
-📅 Ngày vay: {start_date}
-{Thêm các field tuỳ ý nếu cần, ví dụ: Lãi suất, Tiền đóng, Tiền thừa...}
+... (Liệt kê các thông tin quan trọng)
 
-Quy tắc chung:
-- Icon ({status_icon}): Bình thường 🟢, Sắp đến hạn 🟡, Quá hạn 🔴, Đến hạn 🔴.
-- Số tiền phải có dấu phẩy. Bỏ qua field nếu thiếu data. Không giải thích dài dòng.
-
-Chú ý: Hãy xưng hô là "Em" và gọi "Đại ca" thật thân thiện, chuyên nghiệp.
-Nếu Đại ca hỏi thăm, trêu đùa hoặc hỏi những việc ngoài công việc cầm đồ (thời tiết, ngày giờ, chuyện linh tinh...), hãy trả lời vui vẻ, dí dỏm như một người đàn em trung thành, không cần từ chối khô khan."""
+Luôn xưng "Em" và gọi "Đại ca". Dí dỏm, vui vẻ nhưng chốt số liệu phải CHUẨN XÁC 100%. Không tự bịa data, thiếu thì bảo thiếu."""
 
 messages_memory = {}
 
