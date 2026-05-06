@@ -283,7 +283,7 @@ def get_contracts_status(status_filter: str = None):
         "status_requested": status_filter or "Tất cả",
         "total_count": len(results),
         "total_amount": total_amount,
-        "contracts": results[:30] # Limit to 30 to avoid token limits
+        "contracts": results[:1000] # Tăng giới hạn lên rất lớn (1000) để hiển thị được hết
     }
     
     return json.dumps(summary, ensure_ascii=False)
@@ -494,6 +494,13 @@ Luôn xưng "Em" và gọi "Đại ca". Dí dỏm, vui vẻ nhưng chốt số l
 
 messages_memory = {}
 
+async def send_long_message(update: Update, text: str):
+    """Chia nhỏ tin nhắn nếu quá dài (Telegram giới hạn 4096 ký tự/tin)."""
+    max_length = 4000
+    if not text: return
+    for i in range(0, len(text), max_length):
+        await update.message.reply_text(text[i:i+max_length])
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = str(update.message.chat_id)
     if not is_authorized(chat_id):
@@ -528,7 +535,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         logger.error(f"LiteLLM error: {e}")
-        await update.message.reply_text(f"Lỗi khi gọi AI: {str(e)}")
+        await send_long_message(update, f"Lỗi khi gọi AI: {str(e)}")
         return
     
     response_message = response.choices[0].message
@@ -570,12 +577,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             final_answer = second_response.choices[0].message.content
             messages_memory[user_id].append(second_response.choices[0].message)
             logger.info(f"Sending reply after tools: {final_answer}")
-            await update.message.reply_text(final_answer)
+            await send_long_message(update, final_answer)
         except Exception as e:
-            await update.message.reply_text(f"Lỗi xử lý LLM Step 2: {str(e)}")
+            await send_long_message(update, f"Lỗi xử lý LLM Step 2: {str(e)}")
     else:
         logger.info(f"Sending reply: {response_message.content}")
-        await update.message.reply_text(response_message.content)
+        await send_long_message(update, response_message.content)
 
 ADMIN_CHAT_ID_FILE = os.path.join(APP_DATA_DIR, 'admin_chat_id.txt')
 
